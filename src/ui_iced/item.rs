@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::diagram::model;
+use crate::ui::state;
 use iced_graphics::{backend, Backend, Defaults, Primitive, Renderer};
 use iced_native::{
     layout, mouse, Background, Color, Element, Hasher, Layout, Length, Point, Rectangle, Size,
@@ -11,7 +11,7 @@ pub struct Item<'a, B>
 where
     B: Backend + backend::Text,
 {
-    model: model::Item,
+    model: state::Item,
     widget: Element<'a, Message, Renderer<B>>,
     phantom: PhantomData<B>,
 }
@@ -23,7 +23,7 @@ impl<'a, B> Item<'a, B>
 where
     B: Backend + backend::Text + 'a,
 {
-    pub fn new(model: model::Item) -> Self {
+    pub fn new(model: state::Item) -> Self {
         Self {
             model,
             widget: Self::create_widget().into(),
@@ -62,7 +62,7 @@ where
         //    limits.resolve(Size::new(100.0, 100.0)).height,
         //))
         //self.widget.layout(renderer, limits);
-        layout::Node::new(Size::new(100.0, 100.0))
+        layout::Node::new(Size::new(100.0, 50.0 * (self.model.methods.len() as f32)))
     }
 
     fn hash_layout(&self, state: &mut Hasher) {

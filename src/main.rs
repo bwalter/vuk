@@ -1,94 +1,84 @@
 // Copyright 2020-2021 Benoit Walter
 
-use iced::{
-    button, scrollable, Application, Button, Column, Command, Element, HorizontalAlignment,
-    Scrollable, Settings, Text,
-};
-
-mod diagram;
+mod model;
 mod parser;
+mod ui_controller;
+mod ui_state;
 
-//use crate::canvas::Canvas;
-use crate::diagram::Diagram;
+use crate::parser::aidl;
+use crate::ui_controller::UiController;
 
-pub fn main() -> iced::Result {
+#[cfg(feature = "sixtyfps_ui")]
+mod ui_sixtyfps;
+#[cfg(feature = "sixtyfps_ui")]
+use ui_sixtyfps as ui;
+
+#[cfg(feature = "iced_ui")]
+mod ui_iced;
+#[cfg(feature = "iced_ui")]
+use ui_iced as ui;
+
+#[cfg(feature = "quick_ui")]
+mod ui_quick;
+#[cfg(feature = "quick_ui")]
+use ui_quick as ui;
+
+// TODO:
+// x parse interface consts
+// - parse annotations
+// - parse javadoc
+// - parse parcelables
+// - parse enums
+// - layout
+// - filter
+// - open file dialog
+// - check recursive usage of Rc
+// - port to druid
+
+pub fn main() -> jane_eyre::Result<(), Box<dyn std::error::Error>> {
     std::env::set_var("WINIT_UNIX_BACKEND", "x11");
-
-    Vuk::run(Settings::default())
+    color_eyre::install()?;
+    ui::run()
 }
 
-struct Vuk {
-    items: Vec<diagram::model::Item>,
+pub fn create_ui_controller(
+    aidl: &'static str,
+) -> Result<UiController, Box<dyn std::error::Error>> {
+    let file = aidl::parse(aidl)?;
 
-    button_add_state: button::State,
-    scrollable_state: scrollable::State,
+    let mut model = aidl::create_model(vec![file]);
+    model.resolve_types();
+
+    Ok(UiController::new(model))
 }
 
-#[derive(Clone, Debug)]
-enum Message {
-    Add,
-    ItemMessage(usize, diagram::item::Message),
-}
-
-impl Application for Vuk {
-    type Executor = iced::executor::Default;
-    type Message = Message;
-    type Flags = ();
-
-    fn new(_flags: ()) -> (Self, Command<Message>) {
-        (
-            Vuk {
-                items: Vec::new(),
-                button_add_state: button::State::new(),
-                scrollable_state: scrollable::State::new(),
-            },
-            Command::none(),
-        )
-    }
-
-    fn title(&self) -> String {
-        "Vuk".to_string()
-    }
-
-    fn update(&mut self, message: Self::Message) -> Command<Message> {
-        match message {
-            Message::Add => {
-                self.items.push(diagram::model::Item::new(
-                    diagram::model::ItemType::Interface,
-                    "My Interface",
-                ));
-            }
-            Message::ItemMessage(_, _) => {}
+pub const TEST_AIDL: &'static str = r#"
+        package com.concretepage;
+        // Krumpli
+        /**
+         * Prepare a salad.
+         *
+         * This is probably the greenest food. You need:
+         * - a bowl
+         * - salat leaves
+         * - salt
+         * - vinegar
+         */
+        interface FirstService {
+            const int VERSION = 4;
+            String getMessage1(String name   );
+            String getMessage2(String);
+            String getMessage3(String  );
+            oneway int getResult(int val1  , Map<String, Vector<int>> val2);
+            oneway void useOtherServices(SecondService, ThirdService);
         }
 
-        Command::none()
-    }
+        interface SecondService {
+            String getMessage(String name);
+            oneway int getResult(int val1, Map<String, Vector<int>> val2);
+        }
 
-    fn view(&mut self) -> Element<Message> {
-        let button_add = Button::new(
-            &mut self.button_add_state,
-            Text::new("Add").horizontal_alignment(HorizontalAlignment::Center),
-        )
-        .on_press(Message::Add);
-
-        let items: Element<_> = self
-            .items
-            .iter_mut()
-            .enumerate()
-            .fold(Diagram::new(), |sheet, (i, item)| {
-                sheet.push(
-                    diagram::Item::new(item.clone()), //.map(move |message| Message::ItemMessage(i, message)),
-                )
-            })
-            .into();
-
-        let root = Column::new()
-            .max_width(540)
-            .spacing(20)
-            .padding(20)
-            .push(button_add)
-            .push(Scrollable::new(&mut self.scrollable_state).push(items));
-
-        root.into()
-    }
-}
+        interface ThirdService {
+            String getMessage(String name);
+            oneway int getResult(int val1, Map<String, Vector<int>> val2);
+        }"#;

@@ -5,7 +5,7 @@ use iced_native::{
 };
 use std::hash::Hash;
 
-use crate::diagram::Item;
+use crate::ui::Item;
 
 pub struct Diagram<'a, B>
 where
@@ -58,7 +58,7 @@ where
                 let child_limits = Limits::new(Size::ZERO, Size::new(200.0, 200.0));
                 let mut node = child.layout(renderer, &child_limits);
 
-                let child_size = Size::new(100.0, 100.0); //node.size();
+                let child_size = node.size();
                 let child_position = Point::new(50.0, current_y);
                 current_y += child_size.height + 20.0;
 
