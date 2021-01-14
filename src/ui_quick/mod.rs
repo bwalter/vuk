@@ -136,7 +136,7 @@ impl UiListener for Listener {
 
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     vuk_resource();
-    QQuickStyle::set_style("fusion");
+    init_platform();
     qml_register_type::<QuickVuk>(cstr!("Vuk"), 1, 0, cstr!("Vuk"));
 
     let mut engine = QmlEngine::new();
@@ -144,6 +144,16 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     engine.exec();
 
     Ok(())
+}
+
+#[cfg(not(target_os = "windows"))]
+fn init_platform() {
+    QQuickStyle::set_style("Fusion");
+}
+
+#[cfg(target_os = "windows")]
+fn init_platform() {
+    //QQuickStyle::set_style("Universal");
 }
 
 #[cfg(not(target_os = "windows"))]

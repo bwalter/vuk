@@ -37,6 +37,7 @@ use ui_quick as ui;
 
 pub fn main() -> jane_eyre::Result<(), Box<dyn std::error::Error>> {
     std::env::set_var("WINIT_UNIX_BACKEND", "x11");
+    std::env::set_var("QT_QUICK_CONTROLS_STYLE", "Universal");
     color_eyre::install()?;
     ui::run()
 }

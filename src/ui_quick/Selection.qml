@@ -43,16 +43,19 @@ ColumnLayout {
             
             contentItem: Row {
                 ItemSymbol {
+                    anchors.verticalCenter: parent.verticalCenter
                     itemType: modelData.item_type
                 }
 
-                Text {
+                Label {
+                    anchors.verticalCenter: parent.verticalCenter
                     leftPadding: 8
                     rightPadding: 8
                     text: delegate.text
-                    font: delegate.font
+                    font.pointSize: 10
                     //color: delegate.highlighted ? "white" : Qt.darker(colors.colorOfItemType(modelData.item_type))
-                    color: delegate.highlighted ? "white" : "black"
+                    //color: delegate.highlighted ? "white" : "black"
+                    color: "black"
                     elide: Text.ElideRight
                     verticalAlignment: Text.AlignVCenter
                 }

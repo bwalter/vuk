@@ -18,9 +18,9 @@ Rectangle {
     
     readonly property real horizontalSpacing: 150
     readonly property real verticalSpacing: 30
-    readonly property real horizontalPadding: 80
+    readonly property real horizontalPadding: 50
     readonly property real verticalPadding: 50
-    readonly property int transitionDuration: 350  // ms
+    readonly property int transitionDuration: 350
 
     property Item rootItem: null
     property bool ready: false
@@ -138,7 +138,7 @@ Rectangle {
         
         DiagramItem {
             id: diagramItem
-            width: diagramItem === rootItem ? 800 : 500
+            width: diagramItem === rootItem ? 550 : 400  // 800 : 500
             
             onHeightChanged: {
                 diagram.layout();

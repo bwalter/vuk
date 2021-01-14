@@ -74,6 +74,7 @@ Rectangle {
 
                     color: "black"
                     text: diagramItem.node.item.name
+                    font.pointSize: 10
                     font.bold: true
                     verticalAlignment: Qt.AlignVCenter
                     elide: Text.ElideRight
@@ -81,6 +82,16 @@ Rectangle {
 
                 Item {
                     Layout.fillWidth: true
+                }
+            }
+            
+            MouseArea {
+                id: mouseArea
+                anchors.fill: parent
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onClicked: {
+                    if (!expanded) expanded = true;
+                    else openClicked();
                 }
             }
         }
@@ -98,7 +109,7 @@ Rectangle {
             height: implicitHeight
             clip: true
             
-            Item { width: 10; height: 10 }
+            Item { visible: expanded || memberFilter.length > 0; width: 10; height: 10 }
             
             Repeater {
                 model: diagramItem.node.item.members
@@ -112,7 +123,7 @@ Rectangle {
                     color: memberMouseArea.containsMouse ? "blue" : "black"
                     maximumLineCount: 1
                     wrapMode: Text.Wrap
-                    font.pointSize: 10
+                    font.pointSize: 9
                     elide: Text.ElideRight
 
                     property bool passFilter: memberFilter.includes(modelData.index)
@@ -138,15 +149,18 @@ Rectangle {
                     }
                 }
             }
+
+            Item { visible: expanded; width: 10; height: 10 }
         }
 
         Label {
             id: expandCollapse
             anchors { horizontalCenter: parent.horizontalCenter }
+            visible: memberFilter.length > 0
             height: visible ? implicitHeight : 0
             text: expanded ? "\u25B2" : "..."
             color: "black"
-            font.pointSize: 10
+            font.pointSize: 9
             
             MouseArea {
                 anchors.fill: parent
@@ -154,7 +168,7 @@ Rectangle {
             }
         }
 
-        Item { width: 10; height: 10 }
+        Item { visible: expandCollapse.visible; width: 10; height: 10 }
     }
     
     Component {

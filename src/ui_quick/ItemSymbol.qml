@@ -2,7 +2,7 @@ import QtQuick 2.9
 import QtQuick.Controls 2.15
 
 Rectangle {
-    width: 30
+    width: 20
     height: width
     radius: width / 2
     border.color: "black"

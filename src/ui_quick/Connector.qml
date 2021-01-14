@@ -52,7 +52,7 @@ Item {
     Rectangle {
         x: itemTo === parent.rightItem ? parent.width : 0
         y: itemTo === parent.topItem ? 0 : parent.height - 1
-        width: 22
+        width: 15
         height: 1
         color: "black"
         rotation: itemTo === parent.rightItem ? -145 : 35
@@ -62,7 +62,7 @@ Item {
     Rectangle {
         x: itemTo === parent.rightItem ? parent.width : 0
         y: itemTo === parent.topItem ? 0 : parent.height - 1
-        width: 22
+        width: 15
         height: 1
         color: "black"
         rotation: itemTo === parent.rightItem ? -215 : -35
