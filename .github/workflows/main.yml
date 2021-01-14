@@ -59,9 +59,9 @@ jobs:
           cp -r $QT_PLUGIN_PATH $DEST
           cp -r $QML2_IMPORT_PATH $DEST
           cp $Qt5_Dir/bin/*.dll $DEST
-          rm -f ~$DEST/*d.dll
-          rm -rf ~/DEST/plugins/geoservices
-          rm -rf ~/DEST/plugins/sqldrivers
+          rm -f $DEST/*d.dll
+          rm -rf $DEST/plugins/geoservices
+          rm -rf $DEST/plugins/sqldrivers
 
       - name: Prepare package (Linux)
         if: matrix.os != 'windows-latest'
