@@ -18,11 +18,22 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Add SHORT_SHA env property with commit short sha
+        run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
+
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ${{ runner.workspace }}/Qt
+          key: ${{ runner.os }}-QtCache
+
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
           version: '5.15.2'
           install-deps: 'true'
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
@@ -35,23 +46,26 @@ jobs:
           command: build
           args: --release
 
-      - name: Upload build artifacts (Vuk binary)
-        if: matrix.os != 'windows-latest'
-        uses: actions/upload-artifact@v1
-        with:
-          name: vuk-bin
-          path: target/release/vuk
-
-      - name: Upload build artifacts (Vuk binary, Windows)
+      - name: Prepare package (Windows)
         if: matrix.os == 'windows-latest'
-        uses: actions/upload-artifact@v1
-        with:
-          name: vuk-bin
-          path: target/release/vuk.exe
+        run: |
+          mkdir -p ~/pkg/vuk-$SHORT_SHA
+          cp target/release/vuk.exe ~/pkg/vuk-$SHORT_SHA
+          cp -r $QT_PLUGIN_PATH ~/pkg/vuk-$SHORT_SHA
+          cp -r $QML2_IMPORT_PATH ~/pkg/vuk-$SHORT_SHA
+          cp $Qt5_Dir/bin/*.dll ~/pkg/vuk-$SHORT_SHA
+          rm -f ~/pkg/vuk-$SHORT_SHA/*d.dll
+          rm -rf ~/pkg/vuk-$SHORT_SHA/plugins/geoservices
+          rm -rf ~/pkg/vuk-$SHORT_SHA/plugins/sqldrivers
 
-      - name: Upload build artifacts (Qt library)
+      - name: Prepare package (Linux)
+        if: matrix.os != 'windows-latest'
+        run: |
+          cp target/release/vuk ~/pkg/vuk-$SHORT_SHA
+
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v1
         with:
-          name: qt-lib
-          path: ${{ runner.workspace }}/Qt
+          name: vuk-pkg
+          path: '~/pkg'
 
