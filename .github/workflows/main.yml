@@ -65,6 +65,7 @@ jobs:
       - name: Prepare package (Linux)
         if: matrix.os != 'windows-latest'
         run: |
+          mkdir -p ~/pkg/vuk-$SHORT_SHA
           cp target/release/vuk ~/pkg/vuk-$SHORT_SHA
 
       - name: Upload build artifacts
