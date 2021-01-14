@@ -69,7 +69,7 @@ jobs:
           cp target/release/vuk ~/pkg/vuk-$SHORT_SHA
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: vuk-pkg
           path: '~/pkg'
