@@ -27,10 +27,20 @@ jobs:
           #arch: 'win64_msvc2017_64'
           install-deps: 'true'
 
-      - uses: actions-rs/toolchain@v1
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-      - uses: actions-rs/cargo@v1
+
+      - name: Cargo build
+        uses: actions-rs/cargo@v1
         with:
           command: build
           args: --release
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: vuk-package
+          path: target/release
+
