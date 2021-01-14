@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Add SHORT_SHA env property with commit short sha
+      - name: Set SHORT_SHA env
         run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
 
       - name: Cache Qt
@@ -38,7 +38,11 @@ jobs:
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
+          profile: minimal
           toolchain: stable
+
+      - name: Set up Rust cache
+        uses: Swatinem/rust-cache@v1
 
       - name: Cargo build
         uses: actions-rs/cargo@v1
