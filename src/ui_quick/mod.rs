@@ -152,7 +152,7 @@ fn convert_file_url<'a>(file_url: &str) -> PathBuf {
 }
 
 #[cfg(target_os = "windows")]
-fn convert_file_url<'a>(file_url: &'a str) -> &'a str {
+fn convert_file_url<'a>(file_url: &'a str) -> PathBuf {
     use path_slash::PathBufExt;
 
     let stripped_url = file_url.strip_prefix("file:///").unwrap();
