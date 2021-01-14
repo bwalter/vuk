@@ -1,5 +1,7 @@
 extern crate qmetaobject;
 
+use std::path::PathBuf;
+
 use cstr::cstr;
 use qmetaobject::*;
 
@@ -57,20 +59,22 @@ struct QuickVuk {
 
     open: qt_method!(
         fn open(&mut self, url: QString) {
-            if let Some(url) = url.to_string().strip_prefix("file://") {
-                let listener = Listener {};
-                match UiController::open(&url) {
-                    Ok(mut controller) => {
-                        controller.add_listener(Box::new(listener));
+            let path = convert_file_url(&url.to_string());
 
-                        self.selection = serde_json::to_string(&controller.selection).unwrap();
-                        self.controller = Some(controller);
+            println!("Opening {}...", path.to_str().unwrap());
 
-                        self.selection_changed();
-                    }
-                    Err(e) => {
-                        self.error(e.to_string());
-                    }
+            let listener = Listener {};
+            match UiController::open(&path) {
+                Ok(mut controller) => {
+                    controller.add_listener(Box::new(listener));
+
+                    self.selection = serde_json::to_string(&controller.selection).unwrap();
+                    self.controller = Some(controller);
+
+                    self.selection_changed();
+                }
+                Err(e) => {
+                    self.error(e.to_string());
                 }
             }
         }
@@ -140,4 +144,17 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     engine.exec();
 
     Ok(())
+}
+
+#[cfg(not(target_os = "windows"))]
+fn convert_file_url<'a>(file_url: &str) -> PathBuf {
+    file_url.strip_prefix("file://").unwrap().into()
+}
+
+#[cfg(target_os = "windows")]
+fn convert_file_url<'a>(file_url: &'a str) -> &'a str {
+    use path_slash::PathBufExt;
+
+    let stripped_url = file_url.strip_prefix("file:///").unwrap();
+    PathBuf::from_slash(stripped_url)
 }

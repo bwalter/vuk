@@ -11,6 +11,7 @@ ApplicationWindow {
     height: 600
     
     property bool implicitAnimationsEnabled: false
+    property string latestUrl: ""
     
     Component.onCompleted: {
         Qt.application.name = "Vuk";
@@ -25,18 +26,15 @@ ApplicationWindow {
          Menu {
             title: qsTr("&File")
             Action {
-                text: qsTr("Open &File...")
-                onTriggered: {
-                    const dialog = openFileDialogComponent.createObject(null, {});
-                    dialog.open();
-                    dialog.closed.connect(() => dialog.destroy());
-                }
-            }
-            Action {
+                id: openFolderAction
                 text: qsTr("Open Folder...")
                 onTriggered: {
                     const dialog = openFileDialogComponent.createObject(null, { selectFolder: true });
                     dialog.open();
+                    dialog.urlSelected.connect(url => {
+                        latestUrl = url;
+                        vuk.open(url);
+                    });
                     dialog.closed.connect(() => dialog.destroy());
                 }
             }
@@ -59,22 +57,15 @@ ApplicationWindow {
             anchors.fill: parent
             ToolButton {
                 text: qsTr("Open")
-                onClicked: stack.pop()
+                onClicked: openFolderAction.triggered()
             }
             ToolButton {
+                enabled: latestUrl !== ""
                 text: qsTr("Refresh")
-                onClicked: stack.pop()
+                onClicked: vuk.open(latestUrl)
             }
-            Label {
-                text: "Title"
-                elide: Label.ElideRight
-                horizontalAlignment: Qt.AlignHCenter
-                verticalAlignment: Qt.AlignVCenter
+            Item {
                 Layout.fillWidth: true
-            }
-            ToolButton {
-                text: qsTr("⋮")
-                onClicked: menu.open()
             }
         }
     }

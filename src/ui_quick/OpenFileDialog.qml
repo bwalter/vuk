@@ -5,8 +5,8 @@ FileDialog {
     id: fileDialog
     title: "Select file or directory"
     folder: shortcuts.home
-    //selectFolder: true
     
+    signal urlSelected(string url);
     signal closed();
     
     Component.onCompleted: console.log("OpenFileDialog CREATED")
@@ -14,7 +14,7 @@ FileDialog {
     onAccepted: {
         console.log("You chose: " + fileDialog.fileUrls);
         if (fileDialog.fileUrls.length > 0) {
-            vuk.open(fileDialog.fileUrls[0]);
+            urlSelected(fileDialog.fileUrls[0]);
         }
     }
 

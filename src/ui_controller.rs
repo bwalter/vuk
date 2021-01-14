@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, collections::HashMap, fs::File, io::Read, rc::Rc};
+use std::{cmp::Ordering, collections::HashMap, fs::File, io::Read, path::PathBuf, rc::Rc};
 use walkdir::WalkDir;
 
 use crate::parser::{aidl, error::ParseContentError};
@@ -33,7 +33,7 @@ impl UiController {
         }
     }
 
-    pub fn open(path: &str) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn open(path: &PathBuf) -> Result<Self, Box<dyn std::error::Error>> {
         let mut aidl_file_entries = WalkDir::new(path)
             .min_depth(1)
             .into_iter()
