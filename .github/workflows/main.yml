@@ -48,5 +48,6 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: qt-lib
-          path: $RUNNER_WORKSPACE
+          path: |
+            ${{ runner.workspace }}/qt
 
