@@ -11,7 +11,7 @@ jobs:
         os:
           - ubuntu-18.04
           #- macos-10.15
-          - windows-2019
+          - windows-latest
     defaults:
       run:
         shell: bash
@@ -22,9 +22,6 @@ jobs:
         uses: jurplel/install-qt-action@v2
         with:
           version: '5.15.2'
-          #host: 'windows'
-          #target: 'desktop'
-          #arch: 'win64_msvc2017_64'
           install-deps: 'true'
 
       - name: Install Rust toolchain
@@ -39,15 +36,22 @@ jobs:
           args: --release
 
       - name: Upload build artifacts (Vuk binary)
+        if: matrix.os != 'windows-latest'
         uses: actions/upload-artifact@v1
         with:
           name: vuk-bin
           path: target/release/vuk
 
+      - name: Upload build artifacts (Vuk binary, Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v1
+        with:
+          name: vuk-bin
+          path: target/release/vuk.exe
+
       - name: Upload build artifacts (Qt library)
         uses: actions/upload-artifact@v1
         with:
           name: qt-lib
-          path: |
-            ${{ runner.workspace }}/qt
+          path: ${{ runner.workspace }}/Qt
 
