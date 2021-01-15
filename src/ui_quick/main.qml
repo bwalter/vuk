@@ -7,11 +7,12 @@ import Vuk 1.0
 ApplicationWindow {
     id: window
     visible: true
-    width: 800
-    height: 600
+    width: 1400
+    height: 900
     
     property bool implicitAnimationsEnabled: false
     property string latestUrl: ""
+    readonly property Item style: style
     
     Component.onCompleted: {
         Qt.application.name = "Vuk";
@@ -32,6 +33,7 @@ ApplicationWindow {
                     const dialog = openFileDialogComponent.createObject(null, { selectFolder: true });
                     dialog.open();
                     dialog.urlSelected.connect(url => {
+                        navigation.clear();
                         latestUrl = url;
                         vuk.open(url);
                     });
@@ -44,6 +46,22 @@ ApplicationWindow {
 
         Menu {
             title: qsTr("&View")
+            Action {
+                id: recreaseFontSizeAction
+                text: qsTr("Decrease font size")
+                onTriggered: {
+                }
+            }
+            Action {
+                id: increaseFontSizeAction
+                text: qsTr("Increase font size")
+                onTriggered: {
+                }
+            }
+        }
+
+        Menu {
+            title: qsTr("&Go")
         }
 
         Menu {
@@ -54,15 +72,64 @@ ApplicationWindow {
     
     header: ToolBar {
         RowLayout {
-            anchors.fill: parent
-            ToolButton {
-                text: qsTr("Open")
+            id: toolbarRowLayout
+
+            CustomToolButton {
+                text: "Open"
+                iconCode: "\uED25"
                 onClicked: openFolderAction.triggered()
             }
-            ToolButton {
+            CustomToolButton {
+                text: "Refresh"
+                iconCode: "\uE72C"
                 enabled: latestUrl !== ""
-                text: qsTr("Refresh")
-                onClicked: vuk.open(latestUrl)
+                onClicked: {
+                    navigation.clear();
+                    vuk.open(latestUrl)
+                }
+            }
+            Item {
+                width: 30
+            }
+            CustomToolButton {
+                iconCode: "\uE72B"
+                text: "Back"
+                enabled: navigation.canGoBackward
+                onClicked: navigation.previous()
+            }
+            CustomToolButton {
+                iconCode: "\uE72A"
+                text: "Forward"
+                enabled: navigation.canGoForward
+                onClicked: navigation.next()
+            }
+            Item {
+                width: 30
+            }
+            CustomToolButton {
+                iconCode: "\uE8E7"
+                text: "Smaller"
+                enabled: style.canDecreaseFontSize
+                onClicked: style.decreaseFontSize()
+            }
+            CustomToolButton {
+                iconCode: "\uE8E8"
+                text: "Larger"
+                enabled: style.canIncreaseFontSize
+                onClicked: style.increaseFontSize()
+            }
+            Item {
+                width: 30
+            }
+            CustomToolButton {
+                text: "Collapse all"
+                iconCode: "\uF166"
+                onClicked: {}
+            }
+            CustomToolButton {
+                text: "Expand all"
+                iconCode: "\uF164"
+                onClicked: {}
             }
             Item {
                 Layout.fillWidth: true
@@ -83,6 +150,7 @@ ApplicationWindow {
         property var currentItem: null
         
         onSelectionChanged: {
+            navigation.clear();
             selectionState = JSON.parse(selection);
         }
         
@@ -91,8 +159,15 @@ ApplicationWindow {
         }
     }
     
-    Colors {
-        id: colors
+    Style {
+        id: style
+    }
+    
+    Navigation {
+        id: navigation
+        function onCurrentChanged(current) {
+            selection.setCurrent(current);
+        }
     }
 
     SplitView {

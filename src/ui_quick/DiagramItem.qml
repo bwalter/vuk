@@ -11,26 +11,33 @@ Rectangle {
     property var memberFilter: []
     property var expanded: false
     
+    readonly property color foregroundColor: {
+        if (position === 1) return style.diagramItemBorderColor;
+        return style.colorOfItemType(node.item.item_type);
+    }
+
+    readonly property color backgroundColor: {
+        if (position === 1) return style.colorOfItemType(node.item.item_type);
+        return style.diagramItemBorderColor;
+    }
+    
+    readonly property Item style: window.style
+    
     enum Visibility {
         ShowAll,
         ShowWithFilter,
         ShowNone
     }
     
-    property color backgroundColor: {
-        if (position === 1) return colors.colorOfItemType(node.item.item_type);
-        return "white";
-    }
-
-    color: "white"
-    border.color: "black"
-    border.width: 1
+    border.color: foregroundColor
+    border.width: style.diagramItemBorderWidth
     height: column.height
     
-    gradient: Gradient {
-        GradientStop { position: 0.0; color: diagramItem.backgroundColor }
-        GradientStop { position: 1.0; color: "#ffffff" }
-    }
+    color: backgroundColor
+    //gradient: Gradient {
+    //    GradientStop { position: 0.0; color: diagramItem.backgroundColor }
+    //    GradientStop { position: 1.0; color: "#ffffff" }
+    //}
     
     signal openClicked()
     
@@ -64,7 +71,8 @@ Rectangle {
                 }
 
                 ItemSymbol {
-                    color: "white"
+                    color: diagramItem.foregroundColor
+                    border.color: diagramItem.backgroundColor
                     itemType: diagramItem.node.item.item_type
                 }
 
@@ -72,9 +80,10 @@ Rectangle {
                     id: titleLabel
                     Layout.alignment: Qt.AlignVCenter
 
-                    color: "black"
+                    color: diagramItem.foregroundColor
                     text: diagramItem.node.item.name
-                    font.pointSize: 10
+                    font.family: window.style.mainFontFamily
+                    font.pointSize: window.style.itemTitleFontSize
                     font.bold: true
                     verticalAlignment: Qt.AlignVCenter
                     elide: Text.ElideRight
@@ -90,16 +99,20 @@ Rectangle {
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onClicked: {
-                    if (!expanded) expanded = true;
-                    else openClicked();
+                    if (mouse.buttons & Qt.RightButton) openClicked();
+                    else if (mouse.button !== Qt.LeftButton) return;
+
+                    if (mouse.modifiers & Qt.ControlModifier) openClicked();
+                    else if (mouse.modifiers & Qt.MetaModifier) openClicked();
+                    else expanded = !expanded;
                 }
             }
         }
         
         Rectangle {
             anchors { left: parent.left; right: parent.right }
-            height: 1
-            color: "black"
+            height: style.diagramItemBorderWidth
+            color: diagramItem.foregroundColor
         }
         
         Column {
@@ -112,7 +125,9 @@ Rectangle {
             Item { visible: expanded || memberFilter.length > 0; width: 10; height: 10 }
             
             Repeater {
+                id: repeater
                 model: diagramItem.node.item.members
+                readonly property Item style: window.style
 
                 Label {
                     anchors { left: parent.left; right: parent.right }
@@ -120,10 +135,11 @@ Rectangle {
                     opacity: expanded && memberFilter.length > 0 && !passFilter ? 0.2 :
                         expanded || passFilter ? 1.0 : 0
                     text: modelData.text
-                    color: memberMouseArea.containsMouse ? "blue" : "black"
+                    color: memberMouseArea.containsMouse ? repeater.style.diagramItemHighlightColor : diagramItem.foregroundColor
                     maximumLineCount: 1
                     wrapMode: Text.Wrap
-                    font.pointSize: 9
+                    font.family: repeater.style.mainFontFamily
+                    font.pointSize: repeater.style.itemTitleFontSize
                     elide: Text.ElideRight
 
                     property bool passFilter: memberFilter.includes(modelData.index)
@@ -159,7 +175,7 @@ Rectangle {
             visible: memberFilter.length > 0
             height: visible ? implicitHeight : 0
             text: expanded ? "\u25B2" : "..."
-            color: "black"
+            color: diagramItem.foregroundColor
             font.pointSize: 9
             
             MouseArea {

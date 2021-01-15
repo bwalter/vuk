@@ -10,16 +10,19 @@ Rectangle {
     width: diagramScrollView.width
     height: diagramScrollView.height
     
+    property real horizontalPadding: Math.max(50, Math.min(100, diagramScrollView.width / 20))
+    property real horizontalSpacing: Math.max(100, Math.min(200, diagramScrollView.width / 10))
+    property real verticalSpacing: 30
+    property real verticalPadding: 50
+    property real mainItemWidth: Math.max(300, Math.min(800, diagramScrollView.width / 3.5))
+    property real otherItemWidth: Math.max(200, Math.min(600, (diagramScrollView.width - mainItemWidth - horizontalPadding * 2 - horizontalSpacing * 2) / 2))
+        
     onRootItemChanged: {
         scale = 0;
         delayedInitTimer.start();
         appearInAnimation.start();
     }
     
-    readonly property real horizontalSpacing: 150
-    readonly property real verticalSpacing: 30
-    readonly property real horizontalPadding: 50
-    readonly property real verticalPadding: 50
     readonly property int transitionDuration: 350
 
     property Item rootItem: null
@@ -55,6 +58,8 @@ Rectangle {
             destroySubItems(rootItem.rightItems);
             rootItem.destroy();
         }
+        
+        if (!rootNode) return;
 
         // Create new one
         rootItem = createItem(rootNode, { position: 1, expanded: true });
@@ -138,14 +143,14 @@ Rectangle {
         
         DiagramItem {
             id: diagramItem
-            width: diagramItem === rootItem ? 550 : 400  // 800 : 500
+            width: diagramItem === rootItem ? mainItemWidth : otherItemWidth
             
             onHeightChanged: {
                 diagram.layout();
             }
             
             onOpenClicked: {
-                diagram.updateRoot(JSON.parse(vuk.get_root_node(diagramItem.node.item.key)));
+                navigation.push(JSON.parse(vuk.get_root_node(diagramItem.node.item.key)));
             }
 
             property var leftItems: null

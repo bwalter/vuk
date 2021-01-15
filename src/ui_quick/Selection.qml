@@ -5,6 +5,13 @@ import QtQuick.Controls.Material 2.1
 import Vuk 1.0
 
 ColumnLayout {
+    id: selection
+
+    function setCurrent(node) {
+        const index = selectionView.model.findIndex(selectionItem => selectionItem.key === node.item.key);
+        selectionView.currentIndex = index;
+    }
+
     Rectangle {
         Layout.fillWidth: true
         height: childrenRect.height + 2 * 6
@@ -16,11 +23,13 @@ ColumnLayout {
             
             Label {
                 text: "Filter:"
+                font.family: window.style.mainFontFamily
             }
 
             TextField {
                 id: filterField
                 Layout.fillWidth: true
+                font.family: window.style.mainFontFamily
                 selectByMouse: true
             }
         }
@@ -40,11 +49,16 @@ ColumnLayout {
             id: delegate
             width: parent ? parent.width : 0
             highlighted: ListView.isCurrentItem
-            
+            font.family: style.mainFontFamily
+            font.pointSize: style.listViewItemFontSize
+
+            readonly property Item style: window.style
+
             contentItem: Row {
                 ItemSymbol {
                     anchors.verticalCenter: parent.verticalCenter
                     itemType: modelData.item_type
+                    color: Qt.lighter(style.colorOfItemType(itemType))
                 }
 
                 Label {
@@ -52,17 +66,21 @@ ColumnLayout {
                     leftPadding: 8
                     rightPadding: 8
                     text: delegate.text
-                    font.pointSize: 10
-                    //color: delegate.highlighted ? "white" : Qt.darker(colors.colorOfItemType(modelData.item_type))
-                    //color: delegate.highlighted ? "white" : "black"
-                    color: "black"
+                    font: delegate.font
+                    color: delegate.highlighted ? delegate.style.listViewItemHighlightedTextColor : delegate.style.listViewItemTextColor
                     elide: Text.ElideRight
                     verticalAlignment: Text.AlignVCenter
                 }
             }
+            
+            background: Rectangle {
+                implicitHeight: contentItem.implicitHeight
+                color: delegate.highlighted ? delegate.style.listViewItemHighlightColor : delegate.style.listViewItemBackgroundColor
+            }
 
             text: {
-                const pkgColor = highlighted ? "white" : "gray";
+                const pkgColor = highlighted ? delegate.style.listViewItemHighlightedAlternativeTextColor
+                    : delegate.style.listViewItemAlternativeTextColor
                 
                 modelData.name + "<font color=\"" + pkgColor + "\" size=\"2\"> (" + modelData.pkg_path + ")</font>"
             }
@@ -75,8 +93,10 @@ ColumnLayout {
 
             onClicked: {
                 selectionView.currentIndex = index;
-                diagram.updateRoot(JSON.parse(vuk.get_root_node(modelData.key)));
+                navigation.push(JSON.parse(vuk.get_root_node(modelData.key)));
             }
         }
+        
+        ScrollIndicator.vertical: ScrollIndicator {}
     }
 }

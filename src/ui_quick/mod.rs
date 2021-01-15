@@ -14,15 +14,20 @@ use crate::{
 
 qrc!(vuk_resource,
     "vuk" {
-        "src/ui_quick/Colors.qml",
+        "src/ui_quick/CustomToolButton.qml",
         "src/ui_quick/Connector.qml",
         "src/ui_quick/Diagram.qml",
         "src/ui_quick/DiagramItem.qml",
         "src/ui_quick/Documentation.qml",
+        "src/ui_quick/Navigation.qml",
         "src/ui_quick/ItemSymbol.qml",
         "src/ui_quick/OpenFileDialog.qml",
         "src/ui_quick/Selection.qml",
+        "src/ui_quick/Style.qml",
         "src/ui_quick/main.qml",
+        "src/ui_quick/fonts/segoeui.ttf",
+        "src/ui_quick/fonts/segoeuisl.ttf",
+        "src/ui_quick/fonts/SegMDL2.ttf",
     },
 );
 
