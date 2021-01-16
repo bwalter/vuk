@@ -1,6 +1,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import "./style"
 
 Rectangle {
     id: diagramItem
@@ -12,32 +13,28 @@ Rectangle {
     property var expanded: false
     
     readonly property color foregroundColor: {
-        if (position === 1) return style.diagramItemBorderColor;
-        return style.colorOfItemType(node.item.item_type);
+        //if (position === 1) return Style.diagramItemBorderColor;
+        return Style.colorOfItemType(node.item.item_type);
     }
 
     readonly property color backgroundColor: {
-        if (position === 1) return style.colorOfItemType(node.item.item_type);
-        return style.diagramItemBorderColor;
+        //if (position === 1) return Style.colorOfItemType(node.item.item_type);
+        return Style.diagramItemBackgroundColor;
     }
-    
-    readonly property Item style: window.style
     
     enum Visibility {
         ShowAll,
         ShowWithFilter,
         ShowNone
     }
+
+    radius: Style.diagramItemRadius
     
     border.color: foregroundColor
-    border.width: style.diagramItemBorderWidth
+    border.width: Style.diagramItemBorderWidth
     height: column.height
     
     color: backgroundColor
-    //gradient: Gradient {
-    //    GradientStop { position: 0.0; color: diagramItem.backgroundColor }
-    //    GradientStop { position: 1.0; color: "#ffffff" }
-    //}
     
     signal openClicked()
     
@@ -63,6 +60,22 @@ Rectangle {
             height: titleLabel.implicitHeight * 1.5
             clip: true
 
+            Rectangle {
+                id: titleBackgroundRect
+                anchors.fill: parent
+                visible: position === 1
+                color: position === 1 ? diagramItem.foregroundColor : diagramItem.backgroundColor
+                radius: diagramItem.radius
+                border.color: diagramItem.foregroundColor
+                border.width: Style.diagramItemBorderWidth
+            }
+
+            Rectangle {
+                anchors { top: parent.verticalCenter; bottom: parent.bottom; left: parent.left; right: parent.right }
+                visible: position === 1
+                color: titleBackgroundRect.color
+            }
+
             RowLayout {
                 anchors.fill: parent
                 
@@ -71,8 +84,8 @@ Rectangle {
                 }
 
                 ItemSymbol {
-                    color: diagramItem.foregroundColor
-                    border.color: diagramItem.backgroundColor
+                    color: titleLabel.color
+                    border.color: titleBackgroundRect.color
                     itemType: diagramItem.node.item.item_type
                 }
 
@@ -80,10 +93,10 @@ Rectangle {
                     id: titleLabel
                     Layout.alignment: Qt.AlignVCenter
 
-                    color: diagramItem.foregroundColor
+                    color: position === 1 ? diagramItem.backgroundColor : diagramItem.foregroundColor
                     text: diagramItem.node.item.name
-                    font.family: window.style.mainFontFamily
-                    font.pointSize: window.style.itemTitleFontSize
+                    font.family: Style.mainFontFamily
+                    font.pointSize: Style.itemTitleFontSize
                     font.bold: true
                     verticalAlignment: Qt.AlignVCenter
                     elide: Text.ElideRight
@@ -111,8 +124,12 @@ Rectangle {
         
         Rectangle {
             anchors { left: parent.left; right: parent.right }
-            height: style.diagramItemBorderWidth
+            opacity: expanded || memberFilter.length > 0 ? 1 : 0
+            height: Style.diagramItemBorderWidth
             color: diagramItem.foregroundColor
+
+            // Must match the height animation of the member labels
+            Behavior on opacity { NumberAnimation { duration: Style.transitionDuration } }
         }
         
         Column {
@@ -122,12 +139,17 @@ Rectangle {
             height: implicitHeight
             clip: true
             
-            Item { visible: expanded || memberFilter.length > 0; width: 10; height: 10 }
+            Item {
+                width: 10
+                height: expanded || memberFilter.length > 0 ? Style.diagramItemTopPadding : 0
+
+                // Must match the height animation of the member labels
+                Behavior on height { NumberAnimation { duration: Style.transitionDuration } }
+            }
             
             Repeater {
                 id: repeater
                 model: diagramItem.node.item.members
-                readonly property Item style: window.style
 
                 Label {
                     anchors { left: parent.left; right: parent.right }
@@ -135,23 +157,24 @@ Rectangle {
                     opacity: expanded && memberFilter.length > 0 && !passFilter ? 0.2 :
                         expanded || passFilter ? 1.0 : 0
                     text: modelData.text
-                    color: memberMouseArea.containsMouse ? repeater.style.diagramItemHighlightColor : diagramItem.foregroundColor
+                    //color: memberMouseArea.containsMouse ? Style.diagramItemHighlightColor : diagramItem.foregroundColor
+                    color: Style.diagramItemMemberColor
                     maximumLineCount: 1
                     wrapMode: Text.Wrap
-                    font.family: repeater.style.mainFontFamily
-                    font.pointSize: repeater.style.itemTitleFontSize
+                    font.family: Style.mainFontFamily
+                    font.pointSize: Style.itemTitleFontSize
                     elide: Text.ElideRight
 
                     property bool passFilter: memberFilter.includes(modelData.index)
                     
                     Behavior on height {
                         enabled: diagram.ready
-                        NumberAnimation { duration: diagram.ready ? 250 : 0 }
+                        NumberAnimation { duration: diagram.ready ? Style.transitionDuration : 0 }
                     }
 
                     Behavior on opacity {
                         enabled: diagram.ready
-                        NumberAnimation { duration: diagram.ready ? 250 : 0 }
+                        NumberAnimation { duration: diagram.ready ? Style.transitionDuration : 0 }
                     }
 
                     MouseArea {
@@ -166,7 +189,13 @@ Rectangle {
                 }
             }
 
-            Item { visible: expanded; width: 10; height: 10 }
+            Item {
+                width: 10
+                height: expanded ? Style.diagramItemBottomPadding : 0
+
+                // Must match the height animation of the member labels
+                Behavior on height { NumberAnimation { duration: Style.transitionDuration } }
+            }
         }
 
         Label {

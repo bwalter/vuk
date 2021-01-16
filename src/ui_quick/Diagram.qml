@@ -1,6 +1,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import "./style"
 
 Rectangle {
     id: diagram
@@ -10,12 +11,12 @@ Rectangle {
     width: diagramScrollView.width
     height: diagramScrollView.height
     
-    property real horizontalPadding: Math.max(50, Math.min(100, diagramScrollView.width / 20))
-    property real horizontalSpacing: Math.max(100, Math.min(200, diagramScrollView.width / 10))
-    property real verticalSpacing: 30
-    property real verticalPadding: 50
-    property real mainItemWidth: Math.max(300, Math.min(800, diagramScrollView.width / 3.5))
-    property real otherItemWidth: Math.max(200, Math.min(600, (diagramScrollView.width - mainItemWidth - horizontalPadding * 2 - horizontalSpacing * 2) / 2))
+    property real horizontalPadding: Math.max(25, Math.min(50, diagramScrollView.width / 20))
+    property real horizontalSpacing: Math.max(50, Math.min(100, diagramScrollView.width / 10))
+    property real verticalSpacing: 15
+    property real verticalPadding: 25
+    property real mainItemWidth: Math.max(150, Math.min(400, diagramScrollView.width / 3.5))
+    property real otherItemWidth: Math.max(100, Math.min(300, (diagramScrollView.width - mainItemWidth - horizontalPadding * 2 - horizontalSpacing * 2) / 2))
         
     onRootItemChanged: {
         scale = 0;
@@ -23,8 +24,6 @@ Rectangle {
         appearInAnimation.start();
     }
     
-    readonly property int transitionDuration: 350
-
     property Item rootItem: null
     property bool ready: false
 
@@ -33,7 +32,7 @@ Rectangle {
         target: diagram
         from: 0.0
         to: 1.0
-        duration: 200
+        duration: Style.transitionDuration
     }
     
     Timer {
@@ -93,8 +92,17 @@ Rectangle {
         const rightItems = rootItem.rightItems || [];
         const columnCount = 1 + (leftItems.length > 0 ? 1 : 0) + 1;
         
-        const totalLeftHeight = leftItems.reduce((acc, item) => acc + item.height, 0) + Math.max(0, leftItems.length - 1) * verticalSpacing;
-        const totalRightHeight = rightItems.reduce((acc, item) => acc + item.height, 0) + Math.max(0, rightItems.length - 1) * verticalSpacing;
+        let totalLeftHeight = leftItems.reduce((acc, item) => acc + item.height, 0) + Math.max(0, leftItems.length - 1) * verticalSpacing;
+        let totalRightHeight = rightItems.reduce((acc, item) => acc + item.height, 0) + Math.max(0, rightItems.length - 1) * verticalSpacing;
+
+        if (totalLeftHeight > diagramScrollView.height - verticalPadding * 2) {
+            leftItems.forEach(item => item.expanded = false);
+            totalLeftHeight = leftItems.reduce((acc, item) => acc + item.height, 0) + Math.max(0, leftItems.length - 1) * verticalSpacing;
+        }
+        if (totalRightHeight > diagramScrollView.height - verticalPadding * 2) {
+            rightItems.forEach(item => item.expanded = false);
+            totalRightHeight = rightItems.reduce((acc, item) => acc + item.height, 0) + Math.max(0, rightItems.length - 1) * verticalSpacing;
+        }
         
         const maxLeftItemWidth = leftItems.reduce((acc, item) => Math.max(acc, item.width), 0);
         const maxRightItemWidth = rightItems.reduce((acc, item) => Math.max(acc, item.width), 0);
@@ -161,7 +169,7 @@ Rectangle {
                 diagram.destroySubItems(leftItems);
                 
                 diagramItem.leftItems = edges.map(edge => {
-                    const subItem = diagram.createItem(edge.to, { position: 0, expanded: false });
+                    const subItem = diagram.createItem(edge.to, { position: 0, expanded: true });
                     subItem.createConnector(subItem, diagramItem);
                     subItem.memberFilter = edge.from_indices;
                     return subItem;
@@ -173,7 +181,7 @@ Rectangle {
                 diagram.destroySubItems(rightItems);
                 
                 diagramItem.rightItems = edges.map(edge => {
-                    const subItem = diagram.createItem(edge.to, { position: 2, expanded: false });
+                    const subItem = diagram.createItem(edge.to, { position: 2, expanded: true });
                     subItem.createConnector(diagramItem, subItem);
                     subItem.opacity = Qt.binding(() => {
                         if (diagramItem.highlightedMember < 0) return 1.0;

@@ -1,9 +1,8 @@
 extern crate qmetaobject;
 
-use std::path::PathBuf;
-
 use cstr::cstr;
 use qmetaobject::*;
+use std::path::PathBuf;
 
 use crate::{
     create_ui_controller,
@@ -14,6 +13,8 @@ use crate::{
 
 qrc!(vuk_resource,
     "vuk" {
+        "src/ui_quick/Actions.qml",
+        "src/ui_quick/ApplicationSettings.qml",
         "src/ui_quick/CustomToolButton.qml",
         "src/ui_quick/Connector.qml",
         "src/ui_quick/Diagram.qml",
@@ -23,8 +24,9 @@ qrc!(vuk_resource,
         "src/ui_quick/ItemSymbol.qml",
         "src/ui_quick/OpenFileDialog.qml",
         "src/ui_quick/Selection.qml",
-        "src/ui_quick/Style.qml",
         "src/ui_quick/main.qml",
+        "src/ui_quick/style/qmldir",
+        "src/ui_quick/style/Style.qml",
         "src/ui_quick/fonts/segoeui.ttf",
         "src/ui_quick/fonts/segoeuisl.ttf",
         "src/ui_quick/fonts/SegMDL2.ttf",
@@ -142,9 +144,18 @@ impl UiListener for Listener {
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     vuk_resource();
     init_platform();
+
     qml_register_type::<QuickVuk>(cstr!("Vuk"), 1, 0, cstr!("Vuk"));
+    //qml_register_singleton_type(
+    //    QString::from("qrc:/vuk/src/ui_quick/style/Style.qml").into(),
+    //    cstr!("Style"),
+    //    1,
+    //    0,
+    //    cstr!("Style"),
+    //);
 
     let mut engine = QmlEngine::new();
+    engine.load_file("qrc:/vuk/src/ui_quick/ApplicationSettings.qml".into());
     engine.load_file("qrc:/vuk/src/ui_quick/main.qml".into());
     engine.exec();
 
@@ -173,3 +184,4 @@ fn convert_file_url<'a>(file_url: &'a str) -> PathBuf {
     let stripped_url = file_url.strip_prefix("file:///").unwrap();
     PathBuf::from_slash(stripped_url)
 }
+

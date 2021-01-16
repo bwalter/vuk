@@ -14,6 +14,7 @@ QtObject {
         position = -1;
 
         diagram.updateRoot(null);
+        //selection.setCurrent(null);
         currentChanged(null);
     }
     

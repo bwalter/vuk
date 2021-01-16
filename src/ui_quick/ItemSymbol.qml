@@ -1,12 +1,13 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.15
+import "./style"
 
 Rectangle {
-    width: label.font.pointSize * 2.8
+    width: 20
     height: width
     radius: width / 2
     border.color: "black"
-    color: style.colorOfItemType(itemType)
+    color: Style.colorOfItemType(itemType)
     
     property string itemType
     

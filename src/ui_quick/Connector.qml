@@ -1,5 +1,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.15
+import "./style"
 
 Item {
     property Item itemFrom
@@ -24,10 +25,10 @@ Item {
     // ---
     Rectangle {
         x: 0
-        y: parent.leftItem === parent.bottomItem ? parent.height - 1 : 0
-        height: 1
+        y: parent.leftItem === parent.bottomItem ? parent.height : 0
+        height: Style.connectorWidth
         width: parent.width / 2 - 1
-        color: "black"
+        color: Style.connectorColor
     }
 
     //    |
@@ -35,26 +36,26 @@ Item {
         x: parent.width / 2 - 1
         y: 0
         height: parent.height
-        width: 1
-        color: "black"
+        width: Style.connectorWidth
+        color: Style.connectorColor
     }
 
     //     ---
     Rectangle {
         x: parent.width / 2 - 1
-        y: parent.rightItem === parent.bottomItem ? parent.height - 1 : 0
-        height: 1
+        y: parent.rightItem === parent.bottomItem ? parent.height : 0
+        height: Style.connectorWidth
         width: parent.width / 2
-        color: "black"
+        color: Style.connectorColor
     }
     
     // Arrow
     Rectangle {
         x: itemTo === parent.rightItem ? parent.width : 0
         y: itemTo === parent.topItem ? 0 : parent.height - 1
-        width: 15
-        height: 1
-        color: "black"
+        width: Style.connectorArrowLength
+        height: Style.connectorWidth
+        color: Style.connectorColor
         rotation: itemTo === parent.rightItem ? -145 : 35
         transformOrigin: Item.Left
     }
@@ -62,9 +63,9 @@ Item {
     Rectangle {
         x: itemTo === parent.rightItem ? parent.width : 0
         y: itemTo === parent.topItem ? 0 : parent.height - 1
-        width: 15
-        height: 1
-        color: "black"
+        width: Style.connectorArrowLength
+        height: Style.connectorWidth
+        color: Style.connectorColor
         rotation: itemTo === parent.rightItem ? -215 : -35
         transformOrigin: Item.Left
     }

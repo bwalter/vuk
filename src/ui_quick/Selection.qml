@@ -2,19 +2,24 @@ import QtQuick 2.9
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls.Material 2.1
-import Vuk 1.0
+import "./style"
 
 ColumnLayout {
     id: selection
 
     function setCurrent(node) {
+        if (!node) {
+            selectionView.currentIndex = -1;
+            return;
+        }
+
         const index = selectionView.model.findIndex(selectionItem => selectionItem.key === node.item.key);
         selectionView.currentIndex = index;
     }
 
     Rectangle {
         Layout.fillWidth: true
-        height: childrenRect.height + 2 * 6
+        height: childrenRect.height + 6
 
         RowLayout {
             id: filterLayout
@@ -23,13 +28,13 @@ ColumnLayout {
             
             Label {
                 text: "Filter:"
-                font.family: window.style.mainFontFamily
+                font.family: Style.mainFontFamily
             }
 
             TextField {
                 id: filterField
                 Layout.fillWidth: true
-                font.family: window.style.mainFontFamily
+                font.family: Style.mainFontFamily
                 selectByMouse: true
             }
         }
@@ -49,25 +54,23 @@ ColumnLayout {
             id: delegate
             width: parent ? parent.width : 0
             highlighted: ListView.isCurrentItem
-            font.family: style.mainFontFamily
-            font.pointSize: style.listViewItemFontSize
-
-            readonly property Item style: window.style
+            font.family: Style.mainFontFamily
+            font.pointSize: Style.listViewItemFontSize
 
             contentItem: Row {
                 ItemSymbol {
                     anchors.verticalCenter: parent.verticalCenter
                     itemType: modelData.item_type
-                    color: Qt.lighter(style.colorOfItemType(itemType))
+                    color: Qt.lighter(Style.colorOfItemType(itemType))
                 }
 
                 Label {
                     anchors.verticalCenter: parent.verticalCenter
-                    leftPadding: 8
-                    rightPadding: 8
+                    leftPadding: 4
+                    rightPadding: 4
                     text: delegate.text
                     font: delegate.font
-                    color: delegate.highlighted ? delegate.style.listViewItemHighlightedTextColor : delegate.style.listViewItemTextColor
+                    color: delegate.highlighted ? Style.listViewItemHighlightedTextColor : Style.listViewItemTextColor
                     elide: Text.ElideRight
                     verticalAlignment: Text.AlignVCenter
                 }
@@ -75,12 +78,12 @@ ColumnLayout {
             
             background: Rectangle {
                 implicitHeight: contentItem.implicitHeight
-                color: delegate.highlighted ? delegate.style.listViewItemHighlightColor : delegate.style.listViewItemBackgroundColor
+                color: delegate.highlighted ? Style.listViewItemHighlightColor : Style.listViewItemBackgroundColor
             }
 
             text: {
-                const pkgColor = highlighted ? delegate.style.listViewItemHighlightedAlternativeTextColor
-                    : delegate.style.listViewItemAlternativeTextColor
+                const pkgColor = highlighted ? Style.listViewItemHighlightedAlternativeTextColor
+                    : Style.listViewItemAlternativeTextColor
                 
                 modelData.name + "<font color=\"" + pkgColor + "\" size=\"2\"> (" + modelData.pkg_path + ")</font>"
             }
