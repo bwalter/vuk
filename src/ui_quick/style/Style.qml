@@ -43,7 +43,7 @@ QtObject {
 
     readonly property real connectorWidth: 2
     readonly property real connectorArrowLength: 12
-    readonly property color connectorColor: "#6c6c6c"
+    readonly property color connectorColor: "#787878"
     
     readonly property FontLoader mainFont: FontLoader {
         source: "qrc:/vuk/src/ui_quick/fonts/segoeui.ttf"

@@ -13,7 +13,7 @@ QtObject {
         nodes = [];
         position = -1;
 
-        diagram.updateRoot(null);
+        diagram.setMainNode(null);
         //selection.setCurrent(null);
         currentChanged(null);
     }
@@ -22,7 +22,7 @@ QtObject {
         nodes.push(node);
         position = nodes.length - 1;
         
-        diagram.updateRoot(node);
+        diagram.setMainNode(node);
         currentChanged(node);
     }
     
@@ -31,7 +31,7 @@ QtObject {
         --position;
 
         const node = nodes[position];
-        diagram.updateRoot(node);
+        diagram.setMainNode(node);
         currentChanged(node);
     }
 
@@ -40,7 +40,7 @@ QtObject {
         ++position;
 
         const node = nodes[position];
-        diagram.updateRoot(node);
+        diagram.setMainNode(node);
         currentChanged(node);
     }
 }

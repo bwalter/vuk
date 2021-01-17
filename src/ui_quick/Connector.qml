@@ -27,13 +27,13 @@ Item {
         x: 0
         y: parent.leftItem === parent.bottomItem ? parent.height : 0
         height: Style.connectorWidth
-        width: parent.width / 2 - 1
+        width: parent.width / 2
         color: Style.connectorColor
     }
 
     //    |
     Rectangle {
-        x: parent.width / 2 - 1
+        x: parent.width / 2
         y: 0
         height: parent.height
         width: Style.connectorWidth
@@ -42,7 +42,7 @@ Item {
 
     //     ---
     Rectangle {
-        x: parent.width / 2 - 1
+        x: parent.width / 2
         y: parent.rightItem === parent.bottomItem ? parent.height : 0
         height: Style.connectorWidth
         width: parent.width / 2
@@ -52,7 +52,7 @@ Item {
     // Arrow
     Rectangle {
         x: itemTo === parent.rightItem ? parent.width : 0
-        y: itemTo === parent.topItem ? 0 : parent.height - 1
+        y: itemTo === parent.topItem ? 0 : parent.height
         width: Style.connectorArrowLength
         height: Style.connectorWidth
         color: Style.connectorColor
@@ -62,7 +62,7 @@ Item {
 
     Rectangle {
         x: itemTo === parent.rightItem ? parent.width : 0
-        y: itemTo === parent.topItem ? 0 : parent.height - 1
+        y: itemTo === parent.topItem ? 0 : parent.height
         width: Style.connectorArrowLength
         height: Style.connectorWidth
         color: Style.connectorColor

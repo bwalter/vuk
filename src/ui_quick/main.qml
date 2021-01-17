@@ -12,7 +12,6 @@ ApplicationWindow {
     width: 1400
     height: 900
     
-    property bool implicitAnimationsEnabled: false
     property string latestUrl: ""
     
     Material.theme: Material.Light

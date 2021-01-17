@@ -9,8 +9,26 @@ Rectangle {
     property var connectors: []  // TODO: separate left/right?
     property int position: 1
     property int highlightedMember: -1
-    property var memberFilter: []
-    property var expanded: false
+    property var memberFilter: null
+
+    property var explicitExpanded: undefined  // manually changed by user
+    property bool implicitExpanded: true  // set by diagram
+    readonly property bool expanded: explicitExpanded === undefined ? implicitExpanded : explicitExpanded;
+
+    property var explicitOnlyShowRelevantMembers: undefined  // manually changed by user
+    property bool implicitOnlyShowRelevantMembers: false  // set by diagram
+    readonly property bool onlyShowRelevantMembers: explicitOnlyShowRelevantMembers === undefined ? implicitOnlyShowRelevantMembers : explicitOnlyShowRelevantMembers;
+    
+    readonly property int memberCount: node.item.members ? node.item.members.length : 0
+    readonly property real heightAfterAnimation: {
+        if (!expanded) return titleItem.height;
+        
+        const memberCountDisplayed = memberFilter && onlyShowRelevantMembers ? memberFilter.length : memberCount;
+        return titleItem.height + separator.height
+            + (memberCountDisplayed * memberTextMetrics.boundingRect.height)  // members
+            + (Style.diagramItemTopPadding + Style.diagramItemBottomPadding)  // padding
+            + (memberFilter ? 10 : 0);  // expand/collapse
+    }
     
     readonly property color foregroundColor: {
         //if (position === 1) return Style.diagramItemBorderColor;
@@ -22,18 +40,10 @@ Rectangle {
         return Style.diagramItemBackgroundColor;
     }
     
-    enum Visibility {
-        ShowAll,
-        ShowWithFilter,
-        ShowNone
-    }
-
     radius: Style.diagramItemRadius
-    
     border.color: foregroundColor
     border.width: Style.diagramItemBorderWidth
     height: column.height
-    
     color: backgroundColor
     
     signal openClicked()
@@ -43,6 +53,7 @@ Rectangle {
     function createConnector(itemFrom, itemTo) {
         const connector = connectorComponent.createObject(diagram, { itemFrom, itemTo });
         connectors.push(connector);
+        return connector;
     }
     
     function clearConnectors() {
@@ -50,9 +61,17 @@ Rectangle {
         connectors = [];
     }
     
+    TextMetrics {
+        id: memberTextMetrics
+        text: "XXX"
+        font.family: Style.mainFontFamily
+        font.pointSize: Style.itemTitleFontSize
+    }
+    
     Column {
         id: column
         anchors { left: parent.left; right: parent.right }
+        spacing: 0
 
         Item {
             id: titleItem
@@ -62,18 +81,13 @@ Rectangle {
 
             Rectangle {
                 id: titleBackgroundRect
-                anchors.fill: parent
+                anchors { top: parent.top; left: parent.left; right: parent.right }
+                height: column.height
                 visible: position === 1
                 color: position === 1 ? diagramItem.foregroundColor : diagramItem.backgroundColor
                 radius: diagramItem.radius
                 border.color: diagramItem.foregroundColor
                 border.width: Style.diagramItemBorderWidth
-            }
-
-            Rectangle {
-                anchors { top: parent.verticalCenter; bottom: parent.bottom; left: parent.left; right: parent.right }
-                visible: position === 1
-                color: titleBackgroundRect.color
             }
 
             RowLayout {
@@ -117,63 +131,71 @@ Rectangle {
 
                     if (mouse.modifiers & Qt.ControlModifier) openClicked();
                     else if (mouse.modifiers & Qt.MetaModifier) openClicked();
-                    else expanded = !expanded;
+                    else explicitExpanded = !expanded;
                 }
             }
         }
         
         Rectangle {
+            id: separator
             anchors { left: parent.left; right: parent.right }
-            opacity: expanded || memberFilter.length > 0 ? 1 : 0
+            opacity: expanded ? 1 : 0
             height: Style.diagramItemBorderWidth
             color: diagramItem.foregroundColor
 
             // Must match the height animation of the member labels
-            Behavior on opacity { NumberAnimation { duration: Style.transitionDuration } }
+            Behavior on opacity {
+                enabled: diagram.implicitAnimationsEnabled
+                NumberAnimation { duration: Style.transitionDuration }
+            }
         }
         
         Column {
             id: memberColumn
             anchors { left: parent.left; right: parent.right }
             anchors { leftMargin: 20; rightMargin: 20 }
-            height: implicitHeight
+            spacing: 0
             clip: true
             
             Item {
                 width: 10
-                height: expanded || memberFilter.length > 0 ? Style.diagramItemTopPadding : 0
+                height: expanded ? Style.diagramItemTopPadding : 0
 
                 // Must match the height animation of the member labels
-                Behavior on height { NumberAnimation { duration: Style.transitionDuration } }
+                Behavior on height {
+                    enabled: diagram.implicitAnimationsEnabled
+                    NumberAnimation { duration: Style.transitionDuration }
+                }
             }
             
             Repeater {
                 id: repeater
                 model: diagramItem.node.item.members
-
+                
                 Label {
+                    readonly property bool shouldBeShown: !!expanded && (!onlyShowRelevantMembers || passFilter)
+                    readonly property bool passFilter: memberFilter === null || memberFilter.includes(modelData.index)
+
                     anchors { left: parent.left; right: parent.right }
-                    height: expanded || passFilter ? implicitHeight : 0
-                    opacity: expanded && memberFilter.length > 0 && !passFilter ? 0.2 :
-                        expanded || passFilter ? 1.0 : 0
+                    height: shouldBeShown ? memberTextMetrics.boundingRect.height : 0
+                    opacity: !expanded ? 0 :
+                        !memberFilter ? 1 :
+                        passFilter ? 1 : 0.35
                     text: modelData.text
-                    //color: memberMouseArea.containsMouse ? Style.diagramItemHighlightColor : diagramItem.foregroundColor
-                    color: Style.diagramItemMemberColor
+                    color: memberMouseArea.containsMouse ? Qt.darker(diagramItem.foregroundColor) /*Style.diagramItemHighlightColor*/ : diagramItem.foregroundColor
+                    //color: Style.diagramItemMemberColor
                     maximumLineCount: 1
                     wrapMode: Text.Wrap
-                    font.family: Style.mainFontFamily
-                    font.pointSize: Style.itemTitleFontSize
+                    font: memberTextMetrics.font
                     elide: Text.ElideRight
-
-                    property bool passFilter: memberFilter.includes(modelData.index)
                     
                     Behavior on height {
-                        enabled: diagram.ready
+                        enabled: diagram.implicitAnimationsEnabled
                         NumberAnimation { duration: diagram.ready ? Style.transitionDuration : 0 }
                     }
 
                     Behavior on opacity {
-                        enabled: diagram.ready
+                        enabled: diagram.implicitAnimationsEnabled
                         NumberAnimation { duration: diagram.ready ? Style.transitionDuration : 0 }
                     }
 
@@ -194,33 +216,48 @@ Rectangle {
                 height: expanded ? Style.diagramItemBottomPadding : 0
 
                 // Must match the height animation of the member labels
-                Behavior on height { NumberAnimation { duration: Style.transitionDuration } }
+                Behavior on height {
+                    enabled: diagram.implicitAnimationsEnabled
+                    NumberAnimation { duration: Style.transitionDuration }
+                }
             }
         }
 
-        Label {
+        Item {
             id: expandCollapse
-            anchors { horizontalCenter: parent.horizontalCenter }
-            visible: memberFilter.length > 0
-            height: visible ? implicitHeight : 0
-            text: expanded ? "\u25B2" : "..."
-            color: diagramItem.foregroundColor
-            font.pointSize: 9
-            
+            anchors { left: parent.left; right: parent.right }
+            height: expanded && memberFilter && memberFilter.length !== memberCount ? 20 : 0
+            opacity: expanded && memberFilter && memberFilter.length !== memberCount ? 1 : 0
+
+            // Must match the height animation of the member labels
+            Behavior on height {
+                enabled: diagram.implicitAnimationsEnabled
+                NumberAnimation { duration: Style.transitionDuration }
+            }
+            Behavior on opacity {
+                enabled: diagram.implicitAnimationsEnabled
+                NumberAnimation { duration: Style.transitionDuration }
+            }
+
+            Label {
+                anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.verticalCenter }
+                text: !!onlyShowRelevantMembers ? "..." : "\u25B2"
+                color: diagramItem.foregroundColor
+                font.pointSize: 9
+            }
+
             MouseArea {
                 anchors.fill: parent
-                onClicked: expanded = !expanded
+                onClicked: explicitOnlyShowRelevantMembers = !onlyShowRelevantMembers
             }
         }
-
-        Item { visible: expandCollapse.visible; width: 10; height: 10 }
     }
     
     Component {
         id: connectorComponent
 
         Connector {
-            opacity: diagramItem.opacity
+            //opacity: diagramItem.opacity
         }
     }
 }
