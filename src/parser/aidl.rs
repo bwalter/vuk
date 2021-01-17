@@ -152,6 +152,7 @@ fn create_model_const(package: &Rc<model::Package>, the_const: &ast::Const) -> m
         Rc::new(model::Type::Unresolved(const_type)),
         the_const.value.clone(),
         0, // TODO
+        the_const.docu.clone(),
     )
 }
 
@@ -159,6 +160,7 @@ fn create_model_member(package: &Rc<model::Package>, member: &ast::Member) -> mo
     model::Member::new(
         create_model_arg(package, &member.member_type, member.name.clone()),
         0, // TODO
+        member.docu.clone(),
     )
 }
 
@@ -170,6 +172,7 @@ fn create_model_enum_element(
         name: element.name.clone(),
         value: element.value.clone(),
         index: 0, // TODO
+        docu: element.docu.clone(),
     }
 }
 
@@ -181,7 +184,13 @@ fn create_model_method(package: &Rc<model::Package>, method: &ast::Method) -> mo
         .map(|a| create_model_arg(package, &a.arg_type, a.name.clone()))
         .collect();
 
-    model::Method::new(&method.name, return_arg, args, 0 /* TODO */)
+    model::Method::new(
+        &method.name,
+        return_arg,
+        args,
+        0, /* TODO */
+        method.docu.clone(),
+    )
 }
 
 fn create_model_arg(

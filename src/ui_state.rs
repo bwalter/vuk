@@ -110,6 +110,7 @@ impl UiItem {
 #[derive(Clone, Debug, Serialize)]
 pub struct UiMember {
     text: String,
+    docu: String,
     index: usize,
 }
 
@@ -122,6 +123,7 @@ impl UiMember {
                 model_const.const_type.get_name(),
                 model_const.value
             ),
+            docu: model_const.docu.clone(),
             index: model_const.index,
         }
     }
@@ -133,6 +135,7 @@ impl UiMember {
                 model_member.arg.name,
                 model_member.arg.arg_type.get_name(), // TODO: incl. generic
             ),
+            docu: model_member.docu.clone(),
             index: model_member.index,
         }
     }
@@ -160,6 +163,7 @@ impl UiMember {
                     model_method.return_arg.arg_type.get_name()
                 )
             },
+            docu: model_method.docu.clone(),
             index: model_method.index,
         }
     }
@@ -168,6 +172,7 @@ impl UiMember {
         UiMember {
             text: element.name.clone(),
             index: element.index,
+            docu: element.docu.clone(),
         }
     }
 }

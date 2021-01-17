@@ -51,7 +51,7 @@ fn parse_aidl(input: Span) -> IResult<Span, File> {
             opt(ws(parse_forward_declaration)),
         ))(input)?;
 
-        if let (None, None, None) = t {
+        if let (_, None, None) = t {
             // Done => return the old input }
             return Ok((input, imports));
         }

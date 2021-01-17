@@ -56,6 +56,7 @@ impl Model {
                     resolved_const_type,
                     c.value.clone(),
                     index + index_offset,
+                    c.docu.clone(),
                 )
             })
             .collect();
@@ -83,6 +84,7 @@ impl Model {
                     resolved_return_arg,
                     resolved_args,
                     index + index_offset,
+                    m.docu.clone(),
                 )
             })
             .collect::<Vec<Method>>();
@@ -108,7 +110,7 @@ impl Model {
             .enumerate()
             .map(|(index, m)| {
                 let resolved_arg = self.resolved_arg(&m.arg, &imports);
-                Member::new(resolved_arg, index)
+                Member::new(resolved_arg, index, structure.docu.clone())
             })
             .collect();
 
@@ -482,6 +484,7 @@ pub struct Const {
     pub const_type: Rc<Type>,
     pub value: String,
     pub index: usize,
+    pub docu: String,
 }
 
 impl Const {
@@ -490,12 +493,14 @@ impl Const {
         const_type: Rc<Type>,
         value: String,
         index: usize,
+        docu: String,
     ) -> Self {
         Const {
             name: name.into(),
             const_type,
             value,
             index,
+            docu,
         }
     }
 }
@@ -504,11 +509,12 @@ impl Const {
 pub struct Member {
     pub arg: Arg,
     pub index: usize,
+    pub docu: String,
 }
 
 impl Member {
-    pub fn new(arg: Arg, index: usize) -> Self {
-        Member { arg, index }
+    pub fn new(arg: Arg, index: usize, docu: String) -> Self {
+        Member { arg, index, docu }
     }
 }
 
@@ -518,15 +524,23 @@ pub struct Method {
     pub return_arg: Arg,
     pub args: Vec<Arg>,
     pub index: usize,
+    pub docu: String,
 }
 
 impl Method {
-    pub fn new<S: Into<String>>(name: S, return_arg: Arg, args: Vec<Arg>, index: usize) -> Self {
+    pub fn new<S: Into<String>>(
+        name: S,
+        return_arg: Arg,
+        args: Vec<Arg>,
+        index: usize,
+        docu: String,
+    ) -> Self {
         Method {
             name: name.into(),
             return_arg,
             args,
             index,
+            docu,
         }
     }
 
@@ -659,4 +673,5 @@ pub struct EnumElement {
     pub name: String,
     pub value: String,
     pub index: usize,
+    pub docu: String,
 }

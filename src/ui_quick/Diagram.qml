@@ -21,6 +21,11 @@ Rectangle {
     property var leftItems: null
     property var rightItems: null
 
+    property var highlightedItem: null
+    readonly property var highlightedMember: {
+        return mainItem && mainItem.highlightedMember;
+    }
+
     readonly property bool implicitAnimationsEnabled: ready
 
     property bool _layouting: false
@@ -114,8 +119,8 @@ Rectangle {
             const subItem = diagram.createItem(edge.to, { position: 2 });
             const connector = subItem.createConnector(mainItem, subItem);
             /*subItem*/connector.opacity = Qt.binding(() => {
-                if (mainItem.highlightedMember < 0) return 1.0;
-                if (edge.from_indices.includes(mainItem.highlightedMember)) return 1.0;
+                if (mainItem.highlightedMemberIndex < 0) return 1.0;
+                if (edge.from_indices.includes(mainItem.highlightedMemberIndex)) return 1.0;
                 return 0.2;
             });
             return subItem;
@@ -285,6 +290,14 @@ Rectangle {
 
             onOpenClicked: {
                 navigation.push(JSON.parse(vuk.get_root_node(diagramItem.node.item.key)));
+            }
+
+            onContainsMouseChanged: {
+                if (containsMouse) {
+                    diagram.highlightedItem = diagramItem.node.item;
+                } else if (diagram.highlightedItem === diagramItem.node.item) {
+                    diagram.highlightedItem = null;
+                }
             }
         }
     }

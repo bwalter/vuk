@@ -16,7 +16,7 @@ Item {
     x: leftItem.x + leftItem.width
     y: topItem.y + topItem.height / 2
     width: rightItem.x - (leftItem.x + leftItem.width)
-    height: Math.max(1, (bottomItem.y + bottomItem.height / 2 - 1) - (topItem.y + topItem.height / 2))
+    height: Math.max(0, (bottomItem.y + bottomItem.height / 2) - (topItem.y + topItem.height / 2))
     
     // ---
     //    |

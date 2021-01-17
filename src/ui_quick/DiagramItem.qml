@@ -8,7 +8,13 @@ Rectangle {
     property var node
     property var connectors: []  // TODO: separate left/right?
     property int position: 1
-    property int highlightedMember: -1
+    property int highlightedMemberIndex: -1
+    readonly property var highlightedMember: {
+        if (highlightedMemberIndex < 0) return null;
+        return node.item.members[highlightedMemberIndex];
+    }
+    readonly property alias containsMouse: mouseArea.containsMouse
+
     property var memberFilter: null
 
     property var explicitExpanded: undefined  // manually changed by user
@@ -107,7 +113,9 @@ Rectangle {
                     id: titleLabel
                     Layout.alignment: Qt.AlignVCenter
 
-                    color: position === 1 ? diagramItem.backgroundColor : diagramItem.foregroundColor
+                    color: position === 1 ? diagramItem.backgroundColor :
+                        diagramItem.containsMouse ? Qt.darker(diagramItem.foregroundColor) :
+                        diagramItem.foregroundColor
                     text: diagramItem.node.item.name
                     font.family: Style.mainFontFamily
                     font.pointSize: Style.itemTitleFontSize
@@ -124,6 +132,7 @@ Rectangle {
             MouseArea {
                 id: mouseArea
                 anchors.fill: parent
+                hoverEnabled: true
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onClicked: {
                     if (mouse.buttons & Qt.RightButton) openClicked();
@@ -201,11 +210,12 @@ Rectangle {
 
                     MouseArea {
                         id: memberMouseArea
+                        enabled: position === 1
                         anchors.fill: parent
                         hoverEnabled: true
                         onContainsMouseChanged: {
-                            if (containsMouse) diagramItem.highlightedMember = modelData.index
-                            else if (diagramItem.highlightedMember === modelData.index) diagramItem.highlightedMember = -1
+                            if (containsMouse) diagramItem.highlightedMemberIndex = modelData.index
+                            else if (diagramItem.highlightedMemberIndex === modelData.index) diagramItem.highlightedMemberIndex = -1
                         }
                     }
                 }
