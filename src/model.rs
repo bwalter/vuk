@@ -34,14 +34,11 @@ impl Model {
     fn resolved_interface(&self, interface: &Interface) -> Interface {
         let imports = interface.imports.clone(); // TODO?
 
-        let mut index_offset = 0;
-
         // Go through all interface const
         let resolved_consts: Vec<Const> = interface
             .consts
             .iter()
-            .enumerate()
-            .map(|(index, c)| {
+            .map(|c| {
                 let resolved_const_type = if let Type::Unresolved(ref ut) = *c.const_type {
                     if let Some(t) = self.get_resolved_type(ut, &imports) {
                         t
@@ -55,20 +52,17 @@ impl Model {
                     &c.name,
                     resolved_const_type,
                     c.value.clone(),
-                    index + index_offset,
+                    c.index,
                     c.docu.clone(),
                 )
             })
             .collect();
 
-        index_offset += resolved_consts.len();
-
         // Go through all interface methods
         let resolved_methods = interface
             .methods
             .iter()
-            .enumerate()
-            .map(|(index, m)| {
+            .map(|m| {
                 // Try to resolve return type
                 let resolved_return_arg = self.resolved_arg(&m.return_arg, &imports);
 
@@ -83,7 +77,7 @@ impl Model {
                     m.name.clone(),
                     resolved_return_arg,
                     resolved_args,
-                    index + index_offset,
+                    m.index,
                     m.docu.clone(),
                 )
             })
@@ -107,10 +101,9 @@ impl Model {
         let resolved_members = structure
             .members
             .iter()
-            .enumerate()
-            .map(|(index, m)| {
+            .map(|m| {
                 let resolved_arg = self.resolved_arg(&m.arg, &imports);
-                Member::new(resolved_arg, index, structure.docu.clone())
+                Member::new(resolved_arg, m.index, structure.docu.clone())
             })
             .collect();
 
@@ -543,23 +536,6 @@ impl Method {
             docu,
         }
     }
-
-    //pub fn get_sig(&self) -> &Key {
-    //    self.lazy_sig.get_or_init(|| {
-    //        let args_string = self
-    //            .args
-    //            .iter()
-    //            .map(|a| a.arg_type.get_key().clone())
-    //            .collect::<Vec<String>>()
-    //            .join(",");
-    //        format!(
-    //            "{}({})->{}",
-    //            self.name,
-    //            args_string,
-    //            self.return_arg.arg_type.get_key()
-    //        )
-    //    })
-    //}
 }
 
 #[derive(Debug)]

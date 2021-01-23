@@ -330,7 +330,7 @@ fn parse_const_value(input: Span) -> IResult<Span, Span> {
 // - Type memberName;
 fn parse_member(input: Span) -> IResult<Span, Member> {
     let (input, opt_docu) = opt(extract_javadoc)(input)?;
-    let (input, (annotations, member_type, member_name, opt_value, _)) = tuple((
+    let (input, (annotations, member_type, member_name, _opt_value, _)) = tuple((
         many0(ws_plus(parse_annotation)),
         ws_plus(parse_type),
         ws(identifier),

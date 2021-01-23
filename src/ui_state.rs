@@ -14,12 +14,14 @@ pub struct UiSelection {
 
 impl UiSelection {
     pub fn new_with_model_items(model_items: &HashMap<model::Key, Rc<model::Item>>) -> Self {
-        UiSelection {
-            items: model_items
+        let mut items: Vec<UiSelectionItem> = model_items
                 .iter()
                 .map(|(_, i)| i)
                 .map(UiSelectionItem::new_with_model_item)
-                .collect(),
+                .collect();
+        items.sort_by_cached_key(|i| i.pkg_path.clone());
+        UiSelection {
+            items,
             current: -1,
         }
     }

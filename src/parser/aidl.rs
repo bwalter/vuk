@@ -8,6 +8,19 @@ use primitive::Primitive;
 use std::{collections::HashMap, rc::Rc};
 use strum::IntoEnumIterator;
 
+// Post-increment macro
+macro_rules! post_inc {
+    ($i:ident) => {
+        // the macro is callable with any identifier (eg. a variable)
+        {
+            // the macro evaluates to a block expression
+            let old = $i; // save the old value
+            $i += 1; // increment the argument
+            old // the value of the block is `old`
+        }
+    };
+}
+
 pub fn create_model(files: Vec<ast::File>) -> Model {
     let mut items = HashMap::new();
 
@@ -26,7 +39,7 @@ pub fn create_model(files: Vec<ast::File>) -> Model {
                 docu,
                 consts,
                 methods,
-                annotations,
+                annotations: _,
             } => {
                 let interface =
                     create_model_interface(&pkg, &imports, &name, &consts, &methods, docu);
@@ -40,7 +53,7 @@ pub fn create_model(files: Vec<ast::File>) -> Model {
                 name,
                 docu,
                 members,
-                annotations,
+                annotations: _,
             } => {
                 let strukt = create_model_struct(&pkg, &imports, &name, &members, docu);
                 items.insert(
@@ -52,7 +65,7 @@ pub fn create_model(files: Vec<ast::File>) -> Model {
                 name,
                 docu,
                 elements,
-                annotations,
+                annotations: _,
             } => {
                 let enumeration = create_model_enum(&pkg, &imports, &name, &elements, docu);
                 items.insert(
@@ -91,6 +104,8 @@ fn create_model_interface(
     methods: &Vec<ast::Method>,
     docu: String,
 ) -> model::Interface {
+    let mut index = 0;
+
     model::Interface::new(
         pkg.clone(),
         imports,
@@ -98,11 +113,11 @@ fn create_model_interface(
         docu,
         consts
             .into_iter()
-            .map(|c| create_model_const(pkg, c))
+            .map(|c| create_model_const(post_inc!(index), pkg, c))
             .collect(),
         methods
             .into_iter()
-            .map(|m| create_model_method(pkg, m))
+            .map(|m| create_model_method(post_inc!(index), pkg, m))
             .collect(),
     )
 }
@@ -114,6 +129,8 @@ fn create_model_struct(
     members: &Vec<ast::Member>,
     docu: String,
 ) -> model::Struct {
+    let mut index = 0;
+
     model::Struct::new(
         pkg.clone(),
         imports,
@@ -121,7 +138,7 @@ fn create_model_struct(
         docu,
         members
             .into_iter()
-            .map(|m| create_model_member(pkg, m))
+            .map(|m| create_model_member(post_inc!(index), pkg, m))
             .collect(),
     )
 }
@@ -133,50 +150,66 @@ fn create_model_enum(
     elements: &Vec<ast::EnumElement>,
     docu: String,
 ) -> model::Enum {
+    let mut index = 0;
+
     model::Enum::new(
         pkg.clone(),
         name,
         docu,
         elements
             .into_iter()
-            .map(|e| create_model_enum_element(pkg, e))
+            .map(|e| create_model_enum_element(post_inc!(index), pkg, e))
             .collect(),
     )
 }
 
-fn create_model_const(package: &Rc<model::Package>, the_const: &ast::Const) -> model::Const {
+fn create_model_const(
+    index: usize,
+    package: &Rc<model::Package>,
+    the_const: &ast::Const,
+) -> model::Const {
+    let mut index = 0;
     let const_type = create_model_unresolved_type(package, &the_const.const_type);
 
     model::Const::new(
         &the_const.name,
         Rc::new(model::Type::Unresolved(const_type)),
         the_const.value.clone(),
-        0, // TODO
+        post_inc!(index),
         the_const.docu.clone(),
     )
 }
 
-fn create_model_member(package: &Rc<model::Package>, member: &ast::Member) -> model::Member {
+fn create_model_member(
+    index: usize,
+    package: &Rc<model::Package>,
+    member: &ast::Member,
+) -> model::Member {
     model::Member::new(
         create_model_arg(package, &member.member_type, member.name.clone()),
-        0, // TODO
+        index,
         member.docu.clone(),
     )
 }
 
 fn create_model_enum_element(
+    index: usize,
     package: &Rc<model::Package>,
     element: &ast::EnumElement,
 ) -> model::EnumElement {
     model::EnumElement {
         name: element.name.clone(),
         value: element.value.clone(),
-        index: 0, // TODO
+        index,
         docu: element.docu.clone(),
     }
 }
 
-fn create_model_method(package: &Rc<model::Package>, method: &ast::Method) -> model::Method {
+fn create_model_method(
+    index: usize,
+    package: &Rc<model::Package>,
+    method: &ast::Method,
+) -> model::Method {
     let return_arg = create_model_arg(package, &method.return_type, String::new());
     let args = method
         .args
@@ -184,13 +217,7 @@ fn create_model_method(package: &Rc<model::Package>, method: &ast::Method) -> mo
         .map(|a| create_model_arg(package, &a.arg_type, a.name.clone()))
         .collect();
 
-    model::Method::new(
-        &method.name,
-        return_arg,
-        args,
-        0, /* TODO */
-        method.docu.clone(),
-    )
+    model::Method::new(&method.name, return_arg, args, index, method.docu.clone())
 }
 
 fn create_model_arg(

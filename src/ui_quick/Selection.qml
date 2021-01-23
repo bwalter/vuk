@@ -47,6 +47,23 @@ ColumnLayout {
 
         model: vuk.selectionState && vuk.selectionState.items
         clip: true
+
+        section.property: "model.modelData.pkg_path"
+        //section.labelPositioning: ViewSection.InlineLabels
+        section.labelPositioning: ViewSection.CurrentLabelAtStart
+        section.delegate: Rectangle {
+            width: selectionView.width
+            height: 30
+            color: "lightGray"
+
+            Component.onCompleted: console.log("SECTION created:", section)
+
+            Label {
+                anchors.centerIn: parent
+                text: section
+                color: "black"
+            }
+        }
         
         onModelChanged: currentIndex = -1
 

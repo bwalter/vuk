@@ -33,7 +33,7 @@ Rectangle {
         return titleItem.height + separator.height
             + (memberCountDisplayed * memberTextMetrics.boundingRect.height)  // members
             + (Style.diagramItemTopPadding + Style.diagramItemBottomPadding)  // padding
-            + (memberFilter ? 10 : 0);  // expand/collapse
+            + (expandCollapse.shallBeVisible ? 20 : 0);  // expand/collapse
     }
     
     readonly property color foregroundColor: {
@@ -236,8 +236,10 @@ Rectangle {
         Item {
             id: expandCollapse
             anchors { left: parent.left; right: parent.right }
-            height: expanded && memberFilter && memberFilter.length !== memberCount ? 20 : 0
-            opacity: expanded && memberFilter && memberFilter.length !== memberCount ? 1 : 0
+            height: shallBeVisible ? 20 : 0
+            opacity: shallBeVisible !== memberCount ? 1 : 0
+
+            property bool shallBeVisible: expanded && memberFilter && memberFilter.length !== memberCount
 
             // Must match the height animation of the member labels
             Behavior on height {
@@ -269,5 +271,12 @@ Rectangle {
         Connector {
             //opacity: diagramItem.opacity
         }
+    }
+    
+    // Use it to debug heightAfterAnimation (should match the item height)
+    Rectangle {
+        width: 30
+        height: heightAfterAnimation
+        color: "yellow"
     }
 }
