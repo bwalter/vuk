@@ -275,9 +275,9 @@ Rectangle {
     }
     
     // Use it to debug heightAfterAnimation (should match the item height)
-    Rectangle {
-        width: 30
-        height: heightAfterAnimation
-        color: "yellow"
-    }
+    //Rectangle {
+    //    width: 30
+    //    height: heightAfterAnimation
+    //    color: "yellow"
+    //}
 }
