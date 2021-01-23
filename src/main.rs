@@ -13,15 +13,14 @@ use crate::ui_controller::UiController;
 
 // TODO:
 // x parse interface consts
-// - parse annotations
-// - parse javadoc
-// - parse parcelables
-// - parse enums
-// - layout
-// - filter
-// - open file dialog
+// x parse annotations
+// x parse javadoc
+// x parse parcelables
+// x parse enums
+// x layout
+// x filter
+// x open file dialog
 // - check recursive usage of Rc
-// - port to druid
 
 pub fn main() -> jane_eyre::Result<(), Box<dyn std::error::Error>> {
     std::env::set_var("WINIT_UNIX_BACKEND", "x11");
