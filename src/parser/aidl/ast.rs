@@ -118,6 +118,7 @@ impl Arg {
         Self::with_direction(Direction::Unspecified, name, arg_type)
     }
 
+    #[cfg(test)]
     pub fn with_direction<S: Into<String>>(direction: Direction, name: S, arg_type: Type) -> Self {
         Arg {
             direction,

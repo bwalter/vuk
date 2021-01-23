@@ -238,6 +238,7 @@ Rectangle {
             anchors { left: parent.left; right: parent.right }
             height: shallBeVisible ? 20 : 0
             opacity: shallBeVisible !== memberCount ? 1 : 0
+            clip: true
 
             property bool shallBeVisible: expanded && memberFilter && memberFilter.length !== memberCount
 
@@ -253,7 +254,7 @@ Rectangle {
 
             Label {
                 anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.verticalCenter }
-                text: !!onlyShowRelevantMembers ? "..." : "\u25B2"
+                text: onlyShowRelevantMembers ? "..." : "\u25B2"
                 color: diagramItem.foregroundColor
                 font.pointSize: 9
             }

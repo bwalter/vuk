@@ -620,7 +620,10 @@ mod tests {
         let input = Span::new("ArrayTypeName [];rest");
         let (input, output_type) = parse_type(input)?;
 
-        assert_eq!(output_type, Type::with_name("ArrayTypeName[]"),);
+        assert_eq!(
+            output_type,
+            Type::new("Array", vec![Type::with_name("ArrayTypeName")])
+        );
         assert_eq!(*input, ";rest");
 
         Ok(())

@@ -145,7 +145,7 @@ fn create_model_struct(
 
 fn create_model_enum(
     pkg: &Rc<model::Package>,
-    imports: &[String],
+    _imports: &[String],
     name: &str,
     elements: &Vec<ast::EnumElement>,
     docu: String,
@@ -168,14 +168,13 @@ fn create_model_const(
     package: &Rc<model::Package>,
     the_const: &ast::Const,
 ) -> model::Const {
-    let mut index = 0;
     let const_type = create_model_unresolved_type(package, &the_const.const_type);
 
     model::Const::new(
         &the_const.name,
         Rc::new(model::Type::Unresolved(const_type)),
         the_const.value.clone(),
-        post_inc!(index),
+        index,
         the_const.docu.clone(),
     )
 }
@@ -194,7 +193,7 @@ fn create_model_member(
 
 fn create_model_enum_element(
     index: usize,
-    package: &Rc<model::Package>,
+    _package: &Rc<model::Package>,
     element: &ast::EnumElement,
 ) -> model::EnumElement {
     model::EnumElement {
