@@ -4,26 +4,12 @@
 
 mod model;
 mod parser;
+mod ui;
 mod ui_controller;
 mod ui_state;
 
 use crate::parser::aidl;
 use crate::ui_controller::UiController;
-
-#[cfg(feature = "sixtyfps_ui")]
-mod ui_sixtyfps;
-#[cfg(feature = "sixtyfps_ui")]
-use ui_sixtyfps as ui;
-
-#[cfg(feature = "iced_ui")]
-mod ui_iced;
-#[cfg(feature = "iced_ui")]
-use ui_iced as ui;
-
-#[cfg(feature = "quick_ui")]
-mod ui_quick;
-#[cfg(feature = "quick_ui")]
-use ui_quick as ui;
 
 // TODO:
 // x parse interface consts

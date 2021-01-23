@@ -13,24 +13,37 @@ use crate::{
 
 qrc!(vuk_resource,
     "vuk" {
-        "src/ui_quick/Actions.qml",
-        "src/ui_quick/ApplicationSettings.qml",
-        "src/ui_quick/CustomToolButton.qml",
-        "src/ui_quick/Connector.qml",
-        "src/ui_quick/Diagram.qml",
-        "src/ui_quick/DiagramItem.qml",
-        "src/ui_quick/Documentation.qml",
-        "src/ui_quick/Navigation.qml",
-        "src/ui_quick/ItemSymbol.qml",
-        "src/ui_quick/OpenFileDialog.qml",
-        "src/ui_quick/Selection.qml",
-        "src/ui_quick/main.qml",
-        "src/ui_quick/style/qmldir",
-        "src/ui_quick/style/Style.qml",
-        "src/ui_quick/fonts/segoeui.ttf",
-        "src/ui_quick/fonts/segoeuisl.ttf",
-        "src/ui_quick/fonts/SegMDL2.ttf",
+        "src/ui/qml/Actions.qml",
+        "src/ui/qml/ApplicationSettings.qml",
+        "src/ui/qml/CustomToolButton.qml",
+        "src/ui/qml/Connector.qml",
+        "src/ui/qml/Diagram.qml",
+        "src/ui/qml/DiagramItem.qml",
+        "src/ui/qml/Documentation.qml",
+        "src/ui/qml/Navigation.qml",
+        "src/ui/qml/ItemSymbol.qml",
+        "src/ui/qml/OpenFileDialog.qml",
+        "src/ui/qml/Selection.qml",
+        "src/ui/qml/main.qml",
+        "src/ui/qml/style/qmldir",
+        "src/ui/qml/style/Style.qml",
     },
+);
+
+// As including the fonts slows down cargo check and build *a lot*, do not
+// include them in the debug builds
+#[cfg(debug_assertions)]
+qrc!(vuk_resource_fonts,
+    "vuk_fonts" {}
+);
+
+#[cfg(not(debug_assertions))]
+qrc!(vuk_resource_fonts,
+    "vuk_fonts" {
+        "src/ui/fonts/segoeui.ttf",
+        "src/ui/fonts/segoeuisl.ttf",
+        "src/ui/fonts/SegMDL2.ttf",
+    }
 );
 
 #[derive(QObject, Default)]
@@ -143,20 +156,14 @@ impl UiListener for Listener {
 
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     vuk_resource();
+    vuk_resource_fonts();
     init_platform();
 
     qml_register_type::<QuickVuk>(cstr!("Vuk"), 1, 0, cstr!("Vuk"));
-    //qml_register_singleton_type(
-    //    QString::from("qrc:/vuk/src/ui_quick/style/Style.qml").into(),
-    //    cstr!("Style"),
-    //    1,
-    //    0,
-    //    cstr!("Style"),
-    //);
 
     let mut engine = QmlEngine::new();
-    engine.load_file("qrc:/vuk/src/ui_quick/ApplicationSettings.qml".into());
-    engine.load_file("qrc:/vuk/src/ui_quick/main.qml".into());
+    engine.load_file("qrc:/vuk/src/ui/qml/ApplicationSettings.qml".into());
+    engine.load_file("qrc:/vuk/src/ui/qml/main.qml".into());
     engine.exec();
 
     Ok(())
@@ -184,4 +191,3 @@ fn convert_file_url<'a>(file_url: &'a str) -> PathBuf {
     let stripped_url = file_url.strip_prefix("file:///").unwrap();
     PathBuf::from_slash(stripped_url)
 }
-

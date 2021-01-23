@@ -46,11 +46,11 @@ QtObject {
     readonly property color connectorColor: "#787878"
     
     readonly property FontLoader mainFont: FontLoader {
-        source: "qrc:/vuk/src/ui_quick/fonts/segoeui.ttf"
+        source: "qrc:/vuk_fonts/src/ui/fonts/segoeui.ttf"
     }
 
     readonly property FontLoader toolFont: FontLoader {
-        source: "qrc:/vuk/src/ui_quick/fonts/SegMDL2.ttf"
+        source: "qrc:/vuk_fonts/src/ui/fonts/SegMDL2.ttf"
     }
 
     function colorOfItemType(itemType) {
